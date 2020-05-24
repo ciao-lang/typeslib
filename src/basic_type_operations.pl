@@ -30,6 +30,12 @@ write_all_computed_type_inclusion :-
     findall(computed_type_inclusion(X, Y), computed_type_inclusion(X, Y), L),
     write_list1(L). 
 
+:- pred write_list1(+list)
+    # "Writes a list to current output one element in each line.".
+
+write_list1([]).
+write_list1([H|L]) :- writeq(H), nl, write_list1(L).
+
 % End debugging
 
 % TYPE CHECKING RELATED PROCEDURES
