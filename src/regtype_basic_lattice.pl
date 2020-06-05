@@ -76,10 +76,6 @@ var         gnd            struct
 :- use_module(typeslib(typedef), [
     param_matching_mode/1,
     typedef/2]).
-:- use_module(library(lists), [append/3]).
-:- use_module(library(aggregates), [findall/3]).
-
-:- use_module(engine(io_basic)).
 
 % ---------------------------------------------------------------------------
 
