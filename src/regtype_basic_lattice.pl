@@ -733,10 +733,10 @@ define_a_ground_type_aux(A, Term) :-
 
 % ========================================================================
 
-:- regtype pure_type_term(X)
-    # "@var{X} is a term defining a regular type".
-:- impl_defined(pure_type_term/1).
-
+:- prop pure_type_term(X) # "@var{X} is a term defining a regular type".
+% This is just an approximation
+pure_type_term(X) :-
+    nonvar(X).
 
 :- pred compound_pure_type_term(+Type, -Comp, -Name, -Arity)
     # "@var{Type} represents a pure type term with main functor
