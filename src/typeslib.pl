@@ -487,8 +487,8 @@ show_data_(X) :-
     write(X), nl.
 
 is_new_type(A) :-
-    atom_codes(A, AC),
-    append("rt", _, AC), !.
+    atom_concat('rt', N, A),
+    atom_number(N,_).
 
 %----------------------------------------------------------------------%
 
