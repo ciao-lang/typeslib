@@ -486,6 +486,7 @@ show_data(R) :-
 show_data_(X) :-
     write(X), nl.
 
+:- export(is_new_type/1).
 is_new_type(A) :-
     atom_concat('rt', N, A),
     atom_number(N,_).
