@@ -1157,7 +1157,7 @@ dz_equivalent_rules(Rule1, Rule):-
 % ---------------------------------------------------------------------------
 %! ## Equivalent types
 
-:- pred equiv_type(?Type1, ?Type2) : type_symbol * type_symbol
+:- pred equiv_type(?Type1, ?Type2) : ( type_symbol(Type1), var(Type2)) => type_symbol(Type2)
    # "Represents non-parametric type symbols which are equivalent
      (@var{Type2} is the representant type of @var{Type1}).".
 
