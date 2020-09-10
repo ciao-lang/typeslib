@@ -68,7 +68,7 @@
     % Widenings
     terms_naive_ewiden_el/2,
     shortening_el/3
-], [assertions, basicmodes, regtypes, datafacts, hiord]).
+], [assertions, basicmodes, regtypes, datafacts, hiord, nativeprops]).
 
 % -----------------------------------------------------------------------
 
@@ -163,7 +163,7 @@
 
 :- include(typeslib(regtype_rules)).
 
-:- regtype type_symbol/1.
+:- prop type_symbol/1.
 
 type_symbol(Type) :-
     atom(Type),
@@ -1018,57 +1018,95 @@ get_necessary_param_renamings([T|Ts],Rules0,Rules) :-
 %%      remove_param_types(Ts,NParam1).
 
 :- data tmp_param_type_symbol_renaming/2.
-:- data tmp_tyren/1.
-:- data tmp_tydef/1.
-:- data tmp_parren/1.
+:- data tmp_tyren/2. % temporary type renaming
+:- data tmp_tydef/2. % temporary type definition
+:- data tmp_parren/2.
 
 clean_tmp_restore :-
     retractall_fact(tmp_param_type_symbol_renaming(_,_)),
-    retractall_fact(tmp_tyren(_)),
-    retractall_fact(tmp_tydef(_)),
-    retractall_fact(tmp_parren(_)).
+    retractall_fact(tmp_tyren(_,_)),
+    retractall_fact(tmp_tydef(_,_)),
+    retractall_fact(tmp_parren(_,_)).
 
 :- export(restore_types/2).
 :- meta_predicate restore_types(pred(1),?).
 % Rens is an assoc map of Ty-RenTy pairs that relate the saved type
 % name from the dump to the current loaded type. Use this to adjust
 % ("relocate") type names from other saved data structures.
+:- pred restore_types(ConsultPred,-Rens) + not_fails.
 restore_types(ConsultPred,_Rens):-
     clean_tmp_restore,
-    read_aux_info(ConsultPred,Fact),
+    read_aux_info(ConsultPred,Fact), % backtracking here
     ( Fact = typedef(Type,Def) -> true
     ; Fact = param_type_symbol_renaming(Def,Type) ->
+        % TODO: review this for parametric & predefined types
         assertz_fact(tmp_param_type_symbol_renaming(Def,Type)),
         fail
     ; throw(bug)
     ),
     % if there are none, should have failed at this point
-    restore_type_symbol(Type,TypeRen,ParRen), % TODO: 'Name' is ignored!
-    asserta_fact(tmp_tyren(Type-TypeRen)),
-    asserta_fact(tmp_tydef(TypeRen-Def)),
+    restore_type_symbol(Type,TypeRen,ParRen),
+    % TODO: 'Names' are not available because they are not dumped
+    asserta_fact(tmp_tyren(Type,TypeRen)),
+    asserta_fact(tmp_tydef(TypeRen,Def)),
     ( ParRen = nopar ->
         true
-    ; asserta_fact(tmp_parren(TypeRen-ParRen))
+    ; asserta_fact(tmp_parren(TypeRen,ParRen))
     ),
     fail.
-restore_types(_ConsultPred,Rens):-
+restore_types(_ConsultPred,ORens):-
     retractall_fact(tmp_param_type_symbol_renaming(_,_)), % cleanup
     %
-    findall(TyRen, tmp_tyren(TyRen), Rens0),
-    retractall_fact(tmp_tyren(_)),
+    findall(T1-T2, tmp_tyren_nodups(T1,T2), Rens0),
+    retractall_fact(tmp_tyren(_,_)),
     sort(Rens0,Rens1),
     ord_list_to_assoc(Rens1,Rens),
     %
-    findall(TyDef, tmp_tydef(TyDef), TyDefs),
-    retractall_fact(tmp_tydef(_)),
+    findall(T-D, tmp_tydef(T,D), TyDefs),
+    retractall_fact(tmp_tydef(_,_)),
+    % assert renamed types before comparing, the types need to be loaded in the db
     insert_renamed_type_defs(TyDefs,Rens),
     %
     ( % (failure-driven loop)
-      retract_fact(tmp_parren(T-Def)),
-      assert_just_param_renaming(Def,T),
-      fail
+      current_fact(tmp_parren(T,Def)),
+        assert_just_param_renaming(Def,T),
+        fail
+    ; true
+    ),
+    filter_relevant_rens(Rens1,RRens),
+    ord_list_to_assoc(RRens,ORens), % output renaming
+    % (rename back to the type definitions that contained duplicated types)
+    findall(T1-T2, tmp_tyren(T1,T2), RensBack),
+    sort(RensBack,RensBack_s),
+    ord_list_to_assoc(RensBack_s,RensBackDict),
+    ( % (failure-driven loop)
+      member(Ty, TyDefs),
+        retract_fact(typedef(Ty,TyDef)),
+        rename_typedef(TyDef,RensBackDict,TyDefR),
+        assertz_fact(typedef(Ty,TyDefR)),
+        fail
+    ; true
+    ),
+    % remove unused types, safe because we renamed back before
+    ( % (failure-driven loop)
+      retract_fact(tmp_tyren(Ty,_)),
+        retractall_fact(typedef(Ty,_)),
+        fail
     ; true
     ).
+
+% removing unused restored type definition and marking new definitions to be renamed back
+filter_relevant_rens([],[]).
+filter_relevant_rens([Ty1-Ty2|Rs],Rens) :-
+    ( dz_equivalent_types(Ty1,Ty2) -> % duplicated type definition
+        Rens = Rens0,
+        assertz_fact(tmp_tyren(Ty2,Ty1))
+    ;   Rens = [Ty1-Ty2|Rens0]
+    ),
+    filter_relevant_rens(Rs,Rens0).
+
+tmp_tyren_nodups(Ty,TyRen) :-
+    tmp_tyren(Ty,TyRen), Ty \= TyRen.
 
 :- meta_predicate read_aux_info(pred(1),?).
 read_aux_info(ConsultPred,Fact) :-
@@ -1127,4 +1165,3 @@ insert_comp0(<, Head, Tail, Element, [Head|Set], Member) :-
     insert(Tail, Element, Set, Member).
 insert_comp0(=, Head, Tail, _, [Head|Tail], yes).
 insert_comp0(>, Head, Tail, Element, [Element,Head|Tail], no).
-
