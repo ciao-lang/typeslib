@@ -488,8 +488,8 @@ show_data_(X) :-
 
 :- export(is_new_type/1).
 is_new_type(A) :-
-    atom_concat('rt', N, A),
-    atom_number(N,_).
+    ( atom_concat('rt', N, A) ; atom_concat('pt', N, A) ; atom_concat('mrt', N, A) ),
+    atom_number(N,_), !.
 
 %----------------------------------------------------------------------%
 
