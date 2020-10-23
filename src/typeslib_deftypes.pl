@@ -85,7 +85,7 @@ is_interesting_type(T,Mode) :-
 def_build_lattice(Ts0) :-
     add_paramdefs(ParamDefs),
     append(ParamDefs,Ts0,Ts05),
-    del_equivalent([term|Ts05],Ts), % sort of chapuza
+    del_equivalent([term|Ts05],Ts), % sort of kludge
     select(T0,Ts,Ts1),
     select(T1,Ts1,Ts2),
     T1 \= bot,
