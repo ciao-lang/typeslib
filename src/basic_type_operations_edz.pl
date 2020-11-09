@@ -84,18 +84,18 @@ edz_subset(Type1, Size1, Type2, Size2, Relations):-
     edz_subset_v([Type1], [Size1], [[Type2]], [[Size2]], RawRelations),
     edz_postprocess_relations(RawRelations, Size1, Size2, Relations).
 %% End Added by PLG.
-edz_subset(Type1, Size1, Type2, Size2, Relations):- 
-    basic_lattice_type_symbol(Type1), 
-    basic_lattice_type_symbol(Type2),
-    !,
-    edz_subset_lattice(Type1, Size1, Type2, Size2, Relations).
-%% End Paco
 edz_subset(_Type1, Size1, Type2, Size2, [C=A,D=B]):-
     % TODO: add hook? use get_size_definition/5? (JFMC)
     dz_type_included(Type2,num),
     Size1 = num((A,B)),
     !,
     Size2 = num((C,D)).
+edz_subset(Type1, Size1, Type2, Size2, Relations):- 
+    basic_lattice_type_symbol(Type1), 
+    basic_lattice_type_symbol(Type2),
+    !,
+    edz_subset_lattice(Type1, Size1, Type2, Size2, Relations).
+%% End Paco
 edz_subset(Type1, Size1, Type2, Size2, Relations) :-
     edz_subset_v([Type1], [Size1], [[Type2]], [[Size2]], RawRelations),
     edz_postprocess_relations(RawRelations, Size1, Size2, Relations).
