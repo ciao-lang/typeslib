@@ -845,6 +845,14 @@ partial_addarg([(C,CS)|ListArg],F,A,S,[(Term,TermS)|L1],L2):-
 %----------------------------------------------------------------------%
 
 :- export(normalize_type/2).
+:- compilation_fact(norm_type_dup).
+%% When a type is "normalized", a new type symbol is created and the type rule
+%% is inserted in the database without checking if a type symbol for the same
+%% rule already exists. If the compilation fact above is commented, it is
+%% checked syntactically if a rule already exists, using the type symbol of that
+%% rule instead of creating a new one (the complexity of the check is linear
+%% because it is consulting the second argument of the data).
+:- if(defined(norm_type_dup)).
 normalize_type(Type,NType):-
     nonvar(Type),
     ( number(Type)
@@ -855,6 +863,26 @@ normalize_type(Type,NType):-
     new_type_symbol(NType),
     insert_rule(NType,[Type]).
 normalize_type(Type,Type).
+:- else.
+normalize_type(Type,NType):-
+    nonvar(Type),
+    ( number(Type)
+    ; Type = []
+    ; Type = [_|_]
+    ; Type = ^(_)
+    ),!,
+    ( exists_type_rule([Type], NType) ->
+        true
+    ;
+        new_type_symbol(NType),
+        insert_rule(NType,[Type])
+    ).
+normalize_type(Type,Type).
+
+% naive find %%% TODO: LINEAR CHECK
+exists_type_rule(Type, NType) :-
+    pgm_typedef(NType, Type), !.
+:- endif.
 
 %----------------------------------------------------------------------%
 % TODO: put together with prop_to_type, type_to_prop, etc.?
