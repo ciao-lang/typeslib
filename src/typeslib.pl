@@ -84,7 +84,7 @@
    pages 157--187.  MIT Press, 1987.").
 
 :- doc(appendix, "@section{Regular Type Syntax}
-    @include{regular_type_syntax.lpdoc}").
+    @include{../../../core/lib/regtypes/regular_type_syntax.lpdoc}").
 
 :- doc(bug,"1. Check that a proper cleaning-up is performed (eterms loops
     in a second call, now).").
