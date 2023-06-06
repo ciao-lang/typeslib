@@ -261,7 +261,6 @@ cleanup_types:-
     retractall_fact(pgm_dz_pair(_, _)), % currently not needed % TODO: used internally for dz_type_included, do not need to be saved! (JFMC)
     % retractall_fact(simplified_type_symbol_counter(_)),  % not really needed 
     % Assertions
-    init_counter(param_typ_sym), % TODO: needed? param_typ_sym_counter is reset before
     retractall_fact(typ_sym_counter(_)),
     cleanup_type_names,
     retractall_fact(functor_types(_,_,_)),
