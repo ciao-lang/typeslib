@@ -10,6 +10,9 @@
 :- multifile typeslib_is_user_type/1.
 % typeslib_is_user_type(+T): T is a user type
 
+:- multifile typeslib_is_visible/2.
+% typeslib_is_user_type(+F,+A): F/A is a visible symbol in the current context
+
 :- multifile typeslib_interesting_type/2.
 % typeslib_interesting_type(+T, +Mode): T is an "interesting" type,
 %   used in build_defined_types_lattice/0 (if Mode=build) or 

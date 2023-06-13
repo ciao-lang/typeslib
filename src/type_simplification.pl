@@ -180,7 +180,29 @@ get_preprocessing_unit_type_rules(NoAutoRules):-
             (param_type_symbol_renaming(_ParTyp, NPartyp),
             typedef(NPartyp, Def)),    
             NoAutoRules0),
-    append(NoAutoRules0, NoAutoRules1, NoAutoRules).
+    append(NoAutoRules0, NoAutoRules1, NoAutoRules2),
+    filter_visible_types(NoAutoRules2, NoAutoRules).
+
+% Filter only visible types % JFMC
+filter_visible_types([], []).
+filter_visible_types([TypeRule|TypeRules], RTypeRules) :-
+    TypeRule = typedef(S,_),
+    ( type_symbol_is_visible(S) ->
+        RTypeRules = [TypeRule|RTypeRules0]
+    ; RTypeRules = RTypeRules0
+    ),
+    filter_visible_types(TypeRules, RTypeRules0).
+
+% A type symbol is visible in the current context
+type_symbol_is_visible(Typ) :-
+    ( param_type_symbol_renaming(PT,Typ) ->
+        functor(PT, N, 1),
+        arg(1, PT, Arg),
+        % both parametric type and argument must be visible
+        typeslib_is_visible(N,2),
+        typeslib_is_visible(Arg,1)
+    ; typeslib_is_visible(Typ,1)
+    ).
 
 simplify_some_typedefs(TypeRules):-
     get_preprocessing_unit_type_rules(NoAutoRules),
