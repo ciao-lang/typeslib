@@ -535,7 +535,12 @@ unify_with_some_type([NType|NDefin], PType, [NType|RestNDefin]):-
 type_unify(NType, PType):-
     var(PType),
     !,
-    NType = PType.
+    ((typeslib_flag(param_type_args_all) ; non_par_rule_type_symbol(NType)) -> 
+        PType = NType
+    ; new_type_symbol(New_Non_Param_Type),
+      insert_rule(New_Non_Param_Type, [NType]),
+      PType = New_Non_Param_Type
+    ).
 type_unify(NType, PType):- 
     NType == PType,
     !.
