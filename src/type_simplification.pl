@@ -186,15 +186,14 @@ get_preprocessing_unit_type_rules(NoAutoRules):-
 % Filter only visible types % JFMC
 filter_visible_types([], []).
 filter_visible_types([TypeRule|TypeRules], RTypeRules) :-
-    TypeRule = typedef(S,_),
-    ( type_symbol_is_visible(S) ->
+    ( type_symbol_is_visible(TypeRule) ->
         RTypeRules = [TypeRule|RTypeRules0]
     ; RTypeRules = RTypeRules0
     ),
     filter_visible_types(TypeRules, RTypeRules0).
 
-% A type symbol is visible in the current context
-type_symbol_is_visible(Typ) :-
+% The type symbol for the type rule is visible in the current context
+type_symbol_is_visible(typedef(Typ,_)) :- !,
     ( param_type_symbol_renaming(PT,Typ) ->
         functor(PT, N, 1),
         arg(1, PT, Arg),
@@ -203,6 +202,9 @@ type_symbol_is_visible(Typ) :-
         typeslib_is_visible(Arg,1)
     ; typeslib_is_visible(Typ,1)
     ).
+type_symbol_is_visible(paramtypedef(PT,_)) :-
+    functor(PT, N, 1),
+    typeslib_is_visible(N,2).
 
 simplify_some_typedefs(TypeRules):-
     get_preprocessing_unit_type_rules(NoAutoRules),
@@ -243,9 +245,11 @@ simplify_some_typedefs_(NoAutoRules, NewSimAutoRules):-
 get_type_rules_pgm(Rules):-
     findall(typedef(X, Y), pgm_typedef(X, Y), Rules).
 
-% Gets all the parametric type rules currently in the database.
+% Gets all the parametric type rules currently in the database (only visible)
+% NOTE: previously it used all defs, not only the visible ones (JF)
 get_parametric_type_rules(Rules):-
-    findall(paramtypedef(X, Y), paramtypedef(X, Y), Rules).
+    findall(paramtypedef(X, Y), paramtypedef(X, Y), Rules0),
+    filter_visible_types(Rules0, Rules).
 
 get_type_symbols([typedef(Type, _Defin)|Rules], [Type|Types]):-
     get_type_symbols(Rules, Types).
