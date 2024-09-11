@@ -764,7 +764,7 @@ concret_def([T1|Def],List1,List2,Seen):-
     concrete(T1,List1,List0,Seen),
     concret_def(Def,List0,List2,Seen).
 
-concret_arg(0,_,P,P,_,_).
+concret_arg(0,_,P,P,_,_) :- !.
 concret_arg(A,Term,Prev,List,List2,Seen):-
     arg(A,Term,Arg1),
     concrete(Arg1,ListArg1,[],Seen),

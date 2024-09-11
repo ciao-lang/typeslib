@@ -555,7 +555,7 @@ symbols_of(T,Symbols,Rest):-
     symbols_of0(Arity,Term,Symbols,Rest).
 symbols_of(T,[T|Rest],Rest).
 
-symbols_of0(0,_Term,S,S).
+symbols_of0(0,_Term,S,S) :- !.
 symbols_of0(N,Term,Symbols,Rest):-
     arg(N,Term,T),
     symbols_of(T,Symbols,Rest1),

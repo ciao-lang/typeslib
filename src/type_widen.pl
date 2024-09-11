@@ -70,7 +70,7 @@ replace_def([T|Def],[NT|NewDef],T1,T2,NewNode,Seen):-
     replace(T,T1,T2,NewNode,NT,Seen),
     replace_def(Def,NewDef,T1,T2,NewNode,Seen).
 
-replace_arg(0,_,_,_,_,_,_).
+replace_arg(0,_,_,_,_,_,_) :- !.
 replace_arg(A,Term,NewTerm,T1,T2,NewNode,Seen):-
     arg(A,Term,Arg),
     replace(Arg,T1,T2,NewNode,NewArg,Seen),
@@ -256,7 +256,7 @@ hentendef([T1|Def1],[T2|Def],[T|NewDef],Seen,Prev,Flag):-
     hentenwid_(T1,T2,T,Seen,Prev,Flag),
     hentendef(Def1,Def,NewDef,Seen,Prev,Flag).
 
-hentenwid_arg(0,_Term1,_Term2,_NewTerm,_Seen,_Prev,_Flag).
+hentenwid_arg(0,_Term1,_Term2,_NewTerm,_Seen,_Prev,_Flag) :- !.
 hentenwid_arg(A,Term1,Term2,NewTerm,Seen,Prev,Flag):-
     arg(A,Term2,Arg2),
     arg(A,Term1,Arg1),
@@ -396,7 +396,7 @@ hentenwid_(_T1,T2,T2,_Seen,_Prev,_Flag).
 %%      new_replace(T,TPrime,DefPrime,NewNode,NT,Seen),
 %%      new_replace_def(Def,NewDef,TPrime,DefPrime,NewNode,Seen).
 %% 
-%% new_replace_arg(0,_,_,_,_,_,_).
+%% new_replace_arg(0,_,_,_,_,_,_) :- !.
 %% new_replace_arg(A,Term,NewTerm,TPrime,DefPrime,NewNode,Seen):-
 %%      arg(A,Term,Arg),
 %%      new_replace(Arg,TPrime,DefPrime,NewNode,NewArg,Seen),
@@ -808,7 +808,7 @@ ewiden_def([T|Def],[NT|NewDef],T1,T2,W,Sel,LW,Seen,I,Tail):-
     ewiden_elem(T,NT,T1,T2,W,Sel,LW,Seen,I,I1),
     ewiden_def(Def,NewDef,T1,T2,W,Sel,LW,Seen,I1,Tail).
 
-ewiden_args(0,_F,_Term,_NewTerm,_T1,_T2,_W,_Sel,_LW,_Seen,I,I).
+ewiden_args(0,_F,_Term,_NewTerm,_T1,_T2,_W,_Sel,_LW,_Seen,I,I) :- !.
 ewiden_args(A,F,Term,NewTerm,T1,T2,W,Sel,LW,Seen,I,Tail):-
     arg(A,Term,Arg),
     simplify_LW([F/A|Sel],LW,LW1),
@@ -896,7 +896,7 @@ replace_def_EV([T|Def],[NT|NewDef],P,Seen):-
     replace_EV(T,NT,P,Seen),
     replace_def_EV(Def,NewDef,P,Seen). 
 
-replace_arg_EV(0,_,_,_,_).
+replace_arg_EV(0,_,_,_,_) :- !.
 replace_arg_EV(A,Term,NewTerm,P,Seen):-
     arg(A,Term,Arg),
     replace_EV(Arg,NArg,P,Seen),

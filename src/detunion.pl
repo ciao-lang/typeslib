@@ -231,7 +231,7 @@ type_union_NoDB(Type1,Type2,Type3,Seen):-
 %       construct_compound_pure_type_term(NewTerm,UnfType).
 % unfold0(Type,Type,_Seen).         
 
-% unfoldargs(0,_,_,_).
+% unfoldargs(0,_,_,_) :- !.
 % unfoldargs(N,Term,NewTerm,Seen):-
 %       arg(N,Term,Arg),
 %       unfold0(Arg,NArg,Seen),
@@ -274,7 +274,7 @@ deterministic_union0([TermType1|Def1],[TermType2|Def2],>,TermType2,Def,Seen):-
     deterministic_union([TermType1|Def1],Def2,Def,Seen).
 
 
-obtain_new_term_NoDB(0,_,_,_,_).
+obtain_new_term_NoDB(0,_,_,_,_) :- !.
 obtain_new_term_NoDB(N,Term1,Term2,Term,Seen):-
     arg(N,Term1,Arg1),
     arg(N,Term2,Arg2),
