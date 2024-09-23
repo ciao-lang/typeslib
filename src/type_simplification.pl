@@ -193,18 +193,23 @@ filter_visible_types([TypeRule|TypeRules], RTypeRules) :-
     filter_visible_types(TypeRules, RTypeRules0).
 
 % The type symbol for the type rule is visible in the current context
-type_symbol_is_visible(typedef(Typ,_)) :- !,
-    ( param_type_symbol_renaming(PT,Typ) ->
-        functor(PT, N, 1),
-        arg(1, PT, Arg),
-        % both parametric type and argument must be visible
-        typeslib_is_visible(N,2),
-        typeslib_is_visible(Arg,1)
-    ; typeslib_is_visible(Typ,1)
-    ).
+type_symbol_is_visible(typedef(Type,_)) :- !,
+    replace_non_par_rule_type_symbol(Type, NType),
+    type_symbol_is_visible_(NType).
 type_symbol_is_visible(paramtypedef(PT,_)) :-
     functor(PT, N, 1),
     typeslib_is_visible(N,2).
+
+% (Ty can be a type or a type with a parameter)
+type_symbol_is_visible_(Ty) :- atom(Ty), !,
+    typeslib_is_visible(Ty,1).
+type_symbol_is_visible_(PT) :-
+    functor(PT, N, 1),
+    typeslib_is_visible(N,2),
+    %
+    arg(1, PT, Arg),
+    % both parametric type and argument must be visible
+    type_symbol_is_visible_(Arg).
 
 simplify_some_typedefs(TypeRules):-
     get_preprocessing_unit_type_rules(NoAutoRules),
